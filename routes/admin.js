@@ -12,7 +12,7 @@ router.use(authMiddleware, adminOnly);
 router.get('/staff', async (req, res) => {
     try {
         const [rows] = await db.query(
-            'SELECT id, name, email, phone, role, status, registered_at FROM staff WHERE role != "admin" ORDER BY registered_at DESC'
+            'SELECT id, name, email, phone, role, status, registered_at AS registeredAt FROM staff WHERE role != "admin" ORDER BY registered_at DESC'
         );
         res.json({ staff: rows });
     } catch (err) {
@@ -58,7 +58,17 @@ router.patch('/staff/:id/reject', async (req, res) => {
 router.get('/sessions', async (req, res) => {
     try {
         const [rows] = await db.query(`
-            SELECT s.*, st.name AS staff_name, st.role AS staff_role
+            SELECT 
+                s.id, 
+                s.staff_id AS staffId, 
+                s.clock_in AS clockIn, 
+                s.clock_out AS clockOut, 
+                s.total_break AS totalBreak, 
+                s.on_break AS onBreak, 
+                s.break_start AS breakStart, 
+                s.duration,
+                st.name AS staffName, 
+                st.role AS staffRole
             FROM sessions s
             JOIN staff st ON s.staff_id = st.id
             ORDER BY s.clock_in DESC
