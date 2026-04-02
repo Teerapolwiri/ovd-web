@@ -16,9 +16,10 @@ app.use(cors({
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────────
-app.use('/api/auth',   require('./routes/auth'));
-app.use('/api/shifts', require('./routes/shifts'));
-app.use('/api/admin',  require('./routes/admin'));
+app.use('/api/auth',      require('./routes/auth'));
+app.use('/api/shifts',    require('./routes/shifts'));
+app.use('/api/admin',     require('./routes/admin'));
+app.use('/api/schedules', require('./routes/schedules'));
 
 // ── Health Check ──────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date() }));

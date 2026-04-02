@@ -112,4 +112,64 @@ router.post('/sessions/:id/paid', async (req, res) => {
     }
 });
 
+// ─────────────────────────────────────────────
+// GET /api/admin/schedules — ดึงตารางงานทั้งหมด
+// ─────────────────────────────────────────────
+router.get('/schedules', async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT
+                sc.id,
+                sc.staff_id AS staffId,
+                sc.staff_name AS staffName,
+                DATE_FORMAT(sc.date, '%Y-%m-%d') AS date,
+                sc.start_time AS startTime,
+                sc.end_time AS endTime,
+                sc.detail,
+                sc.created_by AS createdBy,
+                sc.created_at AS createdAt
+            FROM schedules sc
+            ORDER BY sc.date ASC, sc.start_time ASC
+        `);
+        res.json({ schedules: rows });
+    } catch (err) {
+        res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// POST /api/admin/schedules — สร้างกะงานใหม่
+// ─────────────────────────────────────────────
+router.post('/schedules', async (req, res) => {
+    try {
+        const { staffId, staffName, date, startTime, endTime, detail } = req.body;
+        if (!staffId || !date || !startTime || !endTime) {
+            return res.status(400).json({ error: 'ข้อมูลไม่ครบ' });
+        }
+        const id = 'sc-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        await db.query(
+            'INSERT INTO schedules (id, staff_id, staff_name, date, start_time, end_time, detail, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, staffId, staffName || null, date, startTime, endTime, detail || null, req.user.id]
+        );
+        res.status(201).json({
+            schedule: { id, staffId, staffName, date, startTime, endTime, detail, createdBy: req.user.id }
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// DELETE /api/admin/schedules/:id — ลบกะงาน
+// ─────────────────────────────────────────────
+router.delete('/schedules/:id', async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM schedules WHERE id = ?', [req.params.id]);
+        if (!result.affectedRows) return res.status(404).json({ error: 'ไม่พบกะงาน' });
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
+    }
+});
+
 module.exports = router;

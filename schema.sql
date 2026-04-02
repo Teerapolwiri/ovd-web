@@ -45,6 +45,20 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (staff_id) REFERENCES staff (id) ON DELETE CASCADE
 );
 
+-- ─── Schedules (Staff Assignments) Table ──────────────────
+CREATE TABLE IF NOT EXISTS schedules (
+    id VARCHAR(20) PRIMARY KEY,
+    staff_id VARCHAR(20) NOT NULL,
+    staff_name VARCHAR(100),
+    date DATE NOT NULL,
+    start_time VARCHAR(10) NOT NULL,
+    end_time VARCHAR(10) NOT NULL,
+    detail VARCHAR(255),
+    created_by VARCHAR(20),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff (id) ON DELETE CASCADE
+);
+
 -- ─── Indexes ───────────────────────────────────────────────
 CREATE INDEX idx_sessions_staff_id ON sessions (staff_id);
 
@@ -53,6 +67,10 @@ CREATE INDEX idx_sessions_clock_in ON sessions (clock_in);
 CREATE INDEX idx_staff_email ON staff (email);
 
 CREATE INDEX idx_staff_status ON staff (status);
+
+CREATE INDEX idx_schedules_staff_id ON schedules (staff_id);
+
+CREATE INDEX idx_schedules_date ON schedules (date);
 
 -- ─── Seed: Default Admin Account ───────────────────────────
 -- password: admin123 (bcrypt hash)
